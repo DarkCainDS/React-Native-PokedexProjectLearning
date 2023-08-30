@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { View, Text } from "react-native";
+import { SafeAreaView } from "react-native";
 import { getPokemonApi, getPokemonDetailsApi } from "../src/api/pokemon";
+import PokemonList from "../src/components/PokemonList";
 
 const Pokedex = () => {
-  const [pokemon, setPokemon] = useState(""); // This is fine
   const [pokemons, setPokemons] = useState([]); // Moved this line to top level
 
   const loadPokemon = async () => {
@@ -11,16 +11,18 @@ const Pokedex = () => {
       const response = await getPokemonApi();
 
       const pokemonsArray = [];
-      for await (const pokemon of response.results) {
-        const pokemonDetails = await getPokemonDetailsApi(pokemon.url);
+      console.log(pokemons);
+      setPokemons(pokemonsArray);
 
+      for await (const pokemon of response.results) {
+        console.log(pokemon.url);
+        const pokemonDetails = await getPokemonDetailsApi(pokemon.url);
         pokemonsArray.push({
           id: pokemonDetails.id,
           name: pokemonDetails.name,
           type: pokemonDetails.types[0].type.name,
           order: pokemonDetails.order,
-          imagen:
-            pokemonDetails.sprites.other["official-artwork"].front_default,
+          image: pokemonDetails.sprites.other["official-artwork"].front_default,
         });
       }
 
@@ -32,13 +34,15 @@ const Pokedex = () => {
 
   useEffect(() => {
     console.log("Hi DarkCainDs");
-    loadPokemon();
+    (async () => {
+      await loadPokemon();
+    })();
   }, []);
 
   return (
-    <View>
-      <Text>POkedex</Text>
-    </View>
+    <SafeAreaView>
+      <PokemonList pokemons={pokemons} />
+    </SafeAreaView>
   );
 };
 
