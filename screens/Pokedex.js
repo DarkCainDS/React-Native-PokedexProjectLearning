@@ -5,17 +5,24 @@ import PokemonList from "../src/components/PokemonList";
 
 const Pokedex = () => {
   const [pokemons, setPokemons] = useState([]); // Moved this line to top level
+  const [nextUrl, setNextUrl] = useState(null);
+
+  useEffect(() => {
+    console.log("Hi DarkCainDs");
+    (async () => {
+      await loadPokemon();
+    })();
+  }, []);
 
   const loadPokemon = async () => {
     try {
-      const response = await getPokemonApi();
-
+      const response = await getPokemonApi(nextUrl);
+      setNextUrl(response.next);
       const pokemonsArray = [];
-      console.log(pokemons);
-      setPokemons(pokemonsArray);
+
+      
 
       for await (const pokemon of response.results) {
-        console.log(pokemon.url);
         const pokemonDetails = await getPokemonDetailsApi(pokemon.url);
         pokemonsArray.push({
           id: pokemonDetails.id,
@@ -26,22 +33,19 @@ const Pokedex = () => {
         });
       }
 
-      setPokemons([...pokemons, ...pokemonsArray]);
+      setPokemons((prevPokemons) => [...prevPokemons, ...pokemonsArray]);
     } catch (error) {
       console.log(error);
-    }
+    } 
   };
-
-  useEffect(() => {
-    console.log("Hi DarkCainDs");
-    (async () => {
-      await loadPokemon();
-    })();
-  }, []);
 
   return (
     <SafeAreaView>
-      <PokemonList pokemons={pokemons} />
+      <PokemonList
+        pokemons={pokemons}
+        loadPokemon={loadPokemon}
+        isNext={nextUrl}
+      />
     </SafeAreaView>
   );
 };
